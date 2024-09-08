@@ -1,0 +1,38 @@
+apiVersion: apps/v1  # Specifies the API version for the Kubernetes Deployment resource.
+kind: Deployment  # Defines the kind of resource, in this case, a Deployment.
+metadata:
+  name: book-catalog-deployment  # The name of the Deployment, used to identify it within the cluster.
+spec:
+  replicas: 1  # The number of pod replicas to run; setting it to 1 ensures a single instance of the application.
+  selector:
+    matchLabels:
+      app: book-catalog  # Defines the label selector used to match the pods managed by this Deployment.
+  template:  # Describes the pod template used by the Deployment to create pods.
+    metadata:
+      labels:
+        app: book-catalog  # Labels applied to the pods created by this Deployment, used for selecting and grouping resources.
+    spec:
+      containers:
+      - name: book-catalog-container  # The name of the container within the pod.
+        image: book-catalog:11  # The container image to use, with the version tag '11'.
+        env:
+        - name: DATABASE_URL
+          value: "postgresql://sit722_part2_wv62_user:NoWMBlGhBOx9K0pPBQzvjjsXbvMKKo7W@dpg-crekb5rv2p9s73d01m8g-a.oregon-postgres.render.com/sit722_part2_wv62"  
+          # Environment variable that sets the database connection string used by the application.
+        - name: PORT
+          value: "8000"  # Environment variable setting the port on which the application will run inside the container.
+        ports:
+        - containerPort: 8000  # The port on the container that will be exposed, matching the PORT environment variable.
+---
+apiVersion: v1  # Specifies the API version for the Kubernetes Service resource.
+kind: Service  # Defines the kind of resource, in this case, a Service.
+metadata:
+  name: book-catalog-service  # The name of the Service, used to identify it within the cluster.
+spec:
+  type: LoadBalancer  # The type of Service; LoadBalancer exposes the service externally using a cloud provider's load balancer.
+  selector:
+    app: book-catalog  # Label selector to associate this Service with the pods having this label.
+  ports:
+    - protocol: TCP  # The protocol used by the Service (TCP in this case).
+      port: 8000  # The port on which the Service will be exposed to the outside.
+      targetPort: 8000  # The port on the container that the traffic will be directed to, matching the containerPort.
